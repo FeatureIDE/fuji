@@ -11,8 +11,10 @@
  * src/TypeErrorInfo.java
  */
 
-import de.ovgu.featureide.fm.core.FeatureModel;
-import de.ovgu.featureide.fm.core.Feature;
+
+import de.ovgu.featureide.fm.core.base.IFeature;
+import de.ovgu.featureide.fm.core.base.IFeatureModel;
+import de.ovgu.featureide.fm.core.base.FeatureUtils;
 import de.ovgu.featureide.fm.core.FeatureDependencies;
 import de.ovgu.featureide.fm.core.io.guidsl.GuidslReader;
 import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
@@ -55,25 +57,25 @@ aspect ExtendedTypeCheck {
 	/* --- */
 
 	/* get the feature model */
-	public FeatureModel ASTNode.getFeatureModel() {
+	public IFeatureModel ASTNode.getFeatureModel() {
 		return getSPLStructure().getFeatureModel();
 	}
 
 	/* (fromFeature ALWAYS toFeature) due to feature model */
 	protected boolean ASTNode.always(FeatureDependencies dep,
-			Feature fromFeature, Feature toFeature) {
+			IFeature fromFeature, IFeature toFeature) {
 		return dep.always(fromFeature).contains(toFeature);
 	}
 
 	/* (fromFeature NEVER toFeature) due to feature model */
 	protected boolean ASTNode.never(FeatureDependencies dep,
-			Feature fromFeature, Feature toFeature) {
+			IFeature fromFeature, IFeature toFeature) {
 		return dep.never(fromFeature).contains(toFeature);
 	}
 
 	/* (fromFeature MAYBE toFeature) due to feature model */
 	protected boolean ASTNode.maybe(FeatureDependencies dep,
-			Feature fromFeature, Feature toFeature) {
+			IFeature fromFeature, IFeature toFeature) {
 		return dep.maybe(fromFeature).contains(toFeature);
 	}
 
@@ -109,13 +111,13 @@ aspect ExtendedTypeCheck {
 		// return-value
 		boolean errorFound = false;
 		/* get the feature model */
-		FeatureModel model = getFeatureModel();
+		IFeatureModel model = getFeatureModel();
 		/* get dependencies from feature model */
 		// FeatureDependencies dep = new FeatureDependencies(model);
 		FeatureDependencies dep = model.getAnalyser().getDependencies();
 		/* get features */
-		ArrayList<Feature> listFeatures = new ArrayList<Feature>();
-		listFeatures.addAll(model.getConcreteFeatures());
+		ArrayList<IFeature> listFeatures = new ArrayList<IFeature>();
+		listFeatures.addAll(FeatureUtils.getConcreteFeatures(model));
 
 		/* just one target (i.e. one decl) */
 		if (declsAndTargetHostTypes.keySet().size() == 1) {
@@ -137,8 +139,8 @@ aspect ExtendedTypeCheck {
 			if ((fromFeatureID != -1) && (toFeatureID != -1)) {
 				/* different features? */
 				if (fromFeatureID != toFeatureID) {
-					Feature fromFeature = listFeatures.get(fromFeatureID);
-					Feature toFeature = listFeatures.get(toFeatureID);
+					IFeature fromFeature = listFeatures.get(fromFeatureID);
+					IFeature toFeature = listFeatures.get(toFeatureID);
 					boolean never = false;
 					boolean maybe = false;
 					/*
@@ -148,12 +150,12 @@ aspect ExtendedTypeCheck {
 					 */
 					if (contextPresentFeatures.size() > 1) {
 						/* list of set of target feature */
-						ArrayList<Set<Feature>> toFeatureList = new ArrayList<Set<Feature>>();
-						HashSet<Feature> toFeatureSet = new HashSet<Feature>();
+						ArrayList<Set<IFeature>> toFeatureList = new ArrayList<Set<IFeature>>();
+						HashSet<IFeature> toFeatureSet = new HashSet<IFeature>();
 						toFeatureSet.add(toFeature);
 						toFeatureList.add(toFeatureSet);
 						/* form the context */
-						HashSet<Feature> contextFeaturesSet = new HashSet<Feature>();
+						HashSet<IFeature> contextFeaturesSet = new HashSet<IFeature>();
 						/*
 						 * next line is mostly redundant (fromFeature should be
 						 * included in contextPresentFeatures), just to get sure
@@ -161,7 +163,7 @@ aspect ExtendedTypeCheck {
 						contextFeaturesSet.add(fromFeature);
 						for (int i : contextPresentFeatures) {
 							if (i != -1) {
-								Feature contextFeature = listFeatures.get(i);
+								IFeature contextFeature = listFeatures.get(i);
 								contextFeaturesSet.add(contextFeature);
 							}
 						}
@@ -170,7 +172,7 @@ aspect ExtendedTypeCheck {
 							 * context features selected, check status of
 							 * toFeature
 							 */
-							maybe = model.mayBeMissing(contextFeaturesSet,
+							maybe = model.getAnalyser().mayBeMissing(contextFeaturesSet,
 									toFeatureList);
 						} catch (TimeoutException e) {
 							e.printStackTrace();
@@ -242,20 +244,20 @@ aspect ExtendedTypeCheck {
 			}
 			/* source feature exists */
 			if (fromFeatureID != -1) {
-				Feature fromFeature = listFeatures.get(fromFeatureID);
+				IFeature fromFeature = listFeatures.get(fromFeatureID);
 				/* list of set of target features */
-				ArrayList<Set<Feature>> toFeaturesList = new ArrayList<Set<Feature>>();
+				ArrayList<Set<IFeature>> toFeaturesList = new ArrayList<Set<IFeature>>();
 				for (int toFeatureID : toFeatureIDs) {
 					/* target feature exists */
 					if (toFeatureID != -1) {
-						Feature toFeature = listFeatures.get(toFeatureID);
-						HashSet<Feature> toFeatureSet = new HashSet<Feature>();
+						IFeature toFeature = listFeatures.get(toFeatureID);
+						HashSet<IFeature> toFeatureSet = new HashSet<IFeature>();
 						toFeatureSet.add(toFeature);
 						toFeaturesList.add(toFeatureSet);
 					}
 				}
 				/* form the context */
-				HashSet<Feature> contextFeaturesSet = new HashSet<Feature>();
+				HashSet<IFeature> contextFeaturesSet = new HashSet<IFeature>();
 				/*
 				 * next line is mostly redundant (fromFeature should be included
 				 * in contextPresentFeatures), just to get sure
@@ -263,14 +265,14 @@ aspect ExtendedTypeCheck {
 				contextFeaturesSet.add(fromFeature);
 				for (int i : contextPresentFeatures) {
 					if (i != -1) {
-						Feature contextFeature = listFeatures.get(i);
+						IFeature contextFeature = listFeatures.get(i);
 						contextFeaturesSet.add(contextFeature);
 					}
 				}
 				boolean mayBeMissing = false;
 				try {
 					/* all features optional, accessing feature selected */
-					mayBeMissing = model.mayBeMissing(contextFeaturesSet,
+					mayBeMissing = model.getAnalyser().mayBeMissing(contextFeaturesSet,
 							toFeaturesList);
 				} catch (TimeoutException e) {
 					e.printStackTrace();
@@ -389,13 +391,13 @@ aspect ExtendedTypeCheck {
 		// return-value
 		boolean errorFound = false;
 		/* get the feature model */
-		FeatureModel model = getFeatureModel();
+		IFeatureModel model = getFeatureModel();
 		/* get dependencies from feature model */
 		// FeatureDependencies dep = new FeatureDependencies(model);
 		FeatureDependencies dep = model.getAnalyser().getDependencies();
 		/* get features */
-		ArrayList<Feature> listFeatures = new ArrayList<Feature>();
-		listFeatures.addAll(model.getConcreteFeatures());
+		ArrayList<IFeature> listFeatures = new ArrayList<IFeature>();
+		listFeatures.addAll(FeatureUtils.getConcreteFeatures(model));
 		/* access from a class: check extends and implements */
 		if (currentSourceHostType instanceof ClassDecl) {
 			ClassDecl sc = (ClassDecl) currentSourceHostType;
@@ -876,11 +878,11 @@ aspect ExtendedTypeCheck {
 	/* analyse collected Type Accesses */
 	public void ASTNode.collectSplTypeErrors() {
 		/* get features */
-		ArrayList<Feature> listFeatures = new ArrayList<Feature>();
-		listFeatures.addAll(getFeatureModel().getConcreteFeatures());
+		ArrayList<IFeature> listFeatures = new ArrayList<IFeature>();
+		listFeatures.addAll(FeatureUtils.getConcreteFeatures(getFeatureModel()));
 		/* for all fromFeatureIDs that need types */
 		for (int i : getProgram().typeAccesses.keySet()) {
-			Feature fromFeature = listFeatures.get(i);
+			IFeature fromFeature = listFeatures.get(i);
 
 			if (!(getProgram().typeAccesses.get(i).isEmpty())) {
 				HashMap<TypeDecl, HashMap<TypeDecl, TypeErrorInfo>> typesAndInfo = getProgram().typeAccesses.get(i);
@@ -1966,8 +1968,8 @@ aspect ExtendedTypeCheck {
 		return sbtei;
 	}
 
-	private void ASTNode.buildSplErrorTextSingle(Feature fromFeature,
-			Feature toFeature, boolean never, boolean maybe, int state,
+	private void ASTNode.buildSplErrorTextSingle(IFeature fromFeature,
+			IFeature toFeature, boolean never, boolean maybe, int state,
 			String targetStructure, TypeDecl sourceHostType,
 			TypeDecl outputTargetHostType, StringBuilder sbtei,
 			String declFirstLine) {
@@ -2072,10 +2074,10 @@ aspect ExtendedTypeCheck {
 		}
 	}
 
-	private void ASTNode.buildSplErrorTextMultiple(Feature fromFeature,
+	private void ASTNode.buildSplErrorTextMultiple(IFeature fromFeature,
 			int state, String targetStructure, TypeDecl sourceHostType,
 			HashSet<Integer> toFeatureIDs, HashMap<Integer, String> mapDecls,
-			ArrayList<Feature> listFeatures,
+			ArrayList<IFeature> listFeatures,
 			HashMap<Integer, String> outputMapDecls, StringBuilder sbtei) {
 
 		StringBuilder sb = new StringBuilder();
@@ -2240,15 +2242,15 @@ aspect ExtendedTypeCheck {
 		if (featureID == -1){
 			return null;
 		}else{
-			ArrayList<Feature> listFeatures = new ArrayList<Feature>();
-			listFeatures.addAll(getFeatureModel().getConcreteFeatures());
+			ArrayList<IFeature> listFeatures = new ArrayList<IFeature>();
+			listFeatures.addAll(FeatureUtils.getConcreteFeatures(getFeatureModel()));
 			String featureName = listFeatures.get(featureID).getName();
 			return featureName;
 		}
 	}
 
-	private void ASTNode.buildSplErrorCSVSingle(Feature fromFeature,
-			Feature toFeature, boolean never, boolean maybe, int state,
+	private void ASTNode.buildSplErrorCSVSingle(IFeature fromFeature,
+			IFeature toFeature, boolean never, boolean maybe, int state,
 			String targetStructure, TypeDecl sourceHostType,
 			TypeDecl outputTargetHostType, StringBuilder sbtei,
 			String declFirstLine) {
@@ -2360,10 +2362,10 @@ aspect ExtendedTypeCheck {
 		System.err.println(sb.toString());
 	}
 
-	private void ASTNode.buildSplErrorCSVMultiple(Feature fromFeature,
+	private void ASTNode.buildSplErrorCSVMultiple(IFeature fromFeature,
 			int state, String targetStructure, TypeDecl sourceHostType,
 			HashSet<Integer> toFeatureIDs, HashMap<Integer, String> mapDecls,
-			ArrayList<Feature> listFeatures,
+			ArrayList<IFeature> listFeatures,
 			HashMap<Integer, String> outputMapDecls, StringBuilder sbtei) {
 
 		//remove newline and tabs

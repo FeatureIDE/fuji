@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,12 +14,15 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
-import de.ovgu.featureide.fm.core.Feature;
-import de.ovgu.featureide.fm.core.FeatureModel;
-import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
-import de.ovgu.featureide.fm.core.io.guidsl.GuidslReader;
-
 import AST.CompilationUnit;
+import de.ovgu.featureide.fm.core.ExtensionManager.NoSuchExtensionException;
+import de.ovgu.featureide.fm.core.base.FeatureUtils;
+import de.ovgu.featureide.fm.core.base.IFeature;
+import de.ovgu.featureide.fm.core.base.IFeatureModel;
+import de.ovgu.featureide.fm.core.base.impl.FMFactoryManager;
+import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
+import de.ovgu.featureide.fm.core.io.guidsl.GuidslFormat;
+import de.ovgu.featureide.fm.core.io.manager.FileHandler;
 
 /**
  * Represents the structure of an SPL, has full information about features,
@@ -38,7 +42,7 @@ public class SPLStructure {
     /* Feature module pathenames in the order they are listed in features file. */
     private List<String> featureModulePathnames; // canonical pathnames
 
-    private FeatureModel featureModel;
+    private IFeatureModel featureModel;
 
     private Map<String, RoleGroup> roleGroups;
 
@@ -68,12 +72,14 @@ public class SPLStructure {
         }
         basedirPathname = new File(bdPathname).getCanonicalPath();
         if (featureModelPathname != null) {
-
             /* Read in the feature model. */
-            File guidsl_file = new File(featureModelPathname);
-            featureModel = new FeatureModel();
-            GuidslReader reader = new GuidslReader(featureModel);
-            reader.readFromFile(guidsl_file);
+        	final GuidslFormat format = new GuidslFormat();
+            try {
+				featureModel = FMFactoryManager.getFactory(featureModelPathname, format).createFeatureModel();
+				FileHandler.load(Paths.get(featureModelPathname), featureModel, format);
+			} catch (NoSuchExtensionException e) {
+				e.printStackTrace();
+			}
         }
         if (featuresFilePathname == null) {
             featureModulePathnames = parseFeatureList(basedirPathname,
@@ -99,7 +105,7 @@ public class SPLStructure {
      * @throws SyntacticErrorException
      * @throws IllegalArgumentException 
      */
-    public SPLStructure(String bdPathname, FeatureModel featureModel,
+    public SPLStructure(String bdPathname, IFeatureModel featureModel,
             List<String> featuresList)
             throws IOException, FeatureDirNotFoundException,
             SyntacticErrorException, IllegalArgumentException {
@@ -209,7 +215,7 @@ public class SPLStructure {
         return roleGroups.keySet().contains(pathname);
     }
 
-    public FeatureModel getFeatureModel() {
+    public IFeatureModel getFeatureModel() {
         return featureModel;
     }
     
@@ -319,9 +325,9 @@ public class SPLStructure {
      *            feature model from which the method takes the feature names
      * @return a list of feature names
      */
-    private List<String> featureNamesFromModel(FeatureModel fm) {
+    private List<String> featureNamesFromModel(IFeatureModel fm) {
         List<String> featuresList = new ArrayList<String>();
-        for (Feature f : fm.getConcreteFeatures()) {
+        for (IFeature f : FeatureUtils.getConcreteFeatures(featureModel)) {
             featuresList.add(f.getName());
         }
         return featuresList;

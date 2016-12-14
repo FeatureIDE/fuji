@@ -1,6 +1,32 @@
 package fuji;
 
-import static fuji.Main.OptionName.*;
+import static fuji.Main.OptionName.BASEDIR;
+import static fuji.Main.OptionName.BOOTCLASSPATH;
+import static fuji.Main.OptionName.CLASSPATH;
+import static fuji.Main.OptionName.COMPOSTION_STRATEGY;
+import static fuji.Main.OptionName.COMPOSTION_STRATEGY_ARG_FAMILY;
+import static fuji.Main.OptionName.COMPOSTION_STRATEGY_ARG_PRODUCT;
+import static fuji.Main.OptionName.CONSTWRITES;
+import static fuji.Main.OptionName.CONSTWRITES_WITH_TRACE;
+import static fuji.Main.OptionName.D;
+import static fuji.Main.OptionName.EXTDIRS;
+import static fuji.Main.OptionName.EXT_ACCESSCOUNT;
+import static fuji.Main.OptionName.EXT_INTROS;
+import static fuji.Main.OptionName.EXT_MEASURE_ASTS_SOURCE;
+import static fuji.Main.OptionName.EXT_REFS;
+import static fuji.Main.OptionName.HELP;
+import static fuji.Main.OptionName.IGNORE_ORIGINAL;
+import static fuji.Main.OptionName.INTRAFLOW;
+import static fuji.Main.OptionName.NOWARN;
+import static fuji.Main.OptionName.PROG_MODE;
+import static fuji.Main.OptionName.SOURCEPATH;
+import static fuji.Main.OptionName.SPL_HAS_NO_VARIABILITY;
+import static fuji.Main.OptionName.SRC;
+import static fuji.Main.OptionName.TEST;
+import static fuji.Main.OptionName.TIMER;
+import static fuji.Main.OptionName.TYPECHECKER;
+import static fuji.Main.OptionName.TYPECHECKER_CSV_MSG;
+import static fuji.Main.OptionName.VERSION;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,17 +46,15 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.jastadd.util.RobustMap;
 
-import de.ovgu.featureide.fm.core.FeatureModel;
-import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
 import AST.ASTNode;
-import AST.Access;
 import AST.BodyDecl;
 import AST.CompilationUnit;
 import AST.ComposingVisitor;
 import AST.ConstructorDecl;
 import AST.Problem;
 import AST.Program;
-import AST.VarAccess;
+import de.ovgu.featureide.fm.core.base.IFeatureModel;
+import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
 
 /**
  * The main fuji class. Manages all the work.
@@ -127,7 +151,7 @@ public class Main implements CompositionContext {
      * @throws CompilerWarningException
      * @throws UnsupportedModelException
      */
-    public Main(String[] args, FeatureModel featureModel,
+    public Main(String[] args, IFeatureModel featureModel,
             List<String> featuresList) throws IllegalArgumentException,
             ParseException, IOException, FeatureDirNotFoundException,
             SyntacticErrorException, SemanticErrorException,
@@ -802,7 +826,11 @@ public class Main implements CompositionContext {
         return Collections.unmodifiableCollection(warnings);
     }
 
-    /**
+    public CommandLine getCmd() {
+		return cmd;
+	}
+
+	/**
      * Enumerates all options (and eventually their arguments) accepted by fuji.
      * 
      * @author kolesnik

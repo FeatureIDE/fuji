@@ -1,8 +1,8 @@
 <project name="JastAddJ" default="build">
-  <property name="jj.root" location="${basedir}/lib/jastaddj-git/"/>
-  <property file="${basedir}/build.properties"/>
+	<property name="jj.root" location="${basedir}/lib/jastaddj-git/" />
+	<property file="${basedir}/build.properties" />
 
-  <description>
+	<description>
     1. Generate JastAddJ for a target Java version:
 
     $ ant java7
@@ -20,274 +20,256 @@
 
   </description>
 
-  <!-- define scanner generator task -->
-  <taskdef name="jflex" classname="JFlex.anttask.JFlexTask"
-	   classpath="${tools.dir}/JFlex.jar"/>
+	<!-- define scanner generator task -->
+	<taskdef name="jflex" classname="JFlex.anttask.JFlexTask" classpath="${tools.dir}/JFlex.jar" />
 
-  <!-- parser generator task -->
-  <taskdef name="beaver" classname="beaver.comp.run.AntTask"
-	   classpath="${tools.dir}/beaver-ant.jar"/>
+	<!-- parser generator task -->
+	<taskdef name="beaver" classname="beaver.comp.run.AntTask" classpath="${tools.dir}/beaver-ant.jar" />
 
-  <!-- jastadd task -->
-  <taskdef name="jastadd" classname="org.jastadd.JastAddTask"
-	   classpath="${tools.dir}/jastadd2.jar"/>
+	<!-- jastadd task -->
+	<taskdef name="jastadd" classname="org.jastadd.JastAddTask" classpath="${tools.dir}/jastadd2.jar" />
 
-  <target name="build" description="build fuji (without FOP access modifiers). Run 'ant clean' first, if you have build fuji with access modifiers before.">
-    <defaultexcludes add="FOPModifiers.flex"/>
-    <defaultexcludes add="FOPModifiers.parser"/>
-    <defaultexcludes add="FOPModifiers.jrag"/>
-    <antcall target="build-mod"/> 
-  </target>
+	<target name="build" description="build fuji (without FOP access modifiers). Run 'ant clean' first, if you have build fuji with access modifiers before.">
+		<defaultexcludes add="FOPModifiers.flex" />
+		<defaultexcludes add="FOPModifiers.parser" />
+		<defaultexcludes add="FOPModifiers.jrag" />
+		<antcall target="build-mod" />
+	</target>
 
-  <target name="gen" description="generate fuji sources (without FOP access modifiers).  Run 'ant clean' first, if you have build fuji with access modifiers before.  This target only generates java files but does not compile them.">
-    <defaultexcludes add="FOPModifiers.flex"/>
-    <defaultexcludes add="FOPModifiers.parser"/>
-    <defaultexcludes add="FOPModifiers.jrag"/>
-    <antcall target="backend-gen-java7"/> 
-  </target>
+	<target name="gen" description="generate fuji sources (without FOP access modifiers).  Run 'ant clean' first, if you have build fuji with access modifiers before.  This target only generates java files but does not compile them.">
+		<defaultexcludes add="FOPModifiers.flex" />
+		<defaultexcludes add="FOPModifiers.parser" />
+		<defaultexcludes add="FOPModifiers.jrag" />
+		<antcall target="backend-gen-java7" />
+	</target>
 
-  <target name="build-mod" depends="backend-gen-java7" description="compile JastAddJ">
-    <mkdir dir="${bin.dir}"/>
-    <!-- <copy todir="${src.dir}" preservelastmodified="true"> -->
-    <!--   <fileset dir="${jj.root}/src"> -->
-    <!-- 	<exclude name="backend/JavaCompiler.java"/> -->
-    <!-- 	<include name="**/*"/> -->
-    <!--   </fileset> -->
-    <!-- </copy> -->
-    <javac
-	destdir="${bin.dir}"
-	debug="${debug}"
-	nowarn="true"
-	includeantruntime="true">
-      <classpath>
-	<pathelement path="${lib}/commons-cli-1.2/commons-cli-1.2.jar"/>
-	<pathelement path="${lib}/eclipse-equinox/org.eclipse.equinox.common_3.6.0.v20110523.jar"/>
-	<pathelement path="${lib}/featureide/de.ovgu.featureide.fm.core_2.6.5.201305151404.jar"/>
-	<pathelement path="${lib}/guidsl/guidsl.jar"/>
-	<pathelement path="${lib}/jakarta/jakarta.jar"/>
-	<pathelement path="${lib}/sat4j/org.sat4j.core.jar"/>
-	<!-- <pathelement path="${tools.dir}/beaver-rt.jar"/> -->
-	<pathelement path="${flow.lib}/junit-4.11-SNAPSHOT.jar"/>
-      </classpath>
-      <src path="${jj.root}/src/frontend"/>
-      <src path="${jj.root}/src/backend"/>
-      <src path="${jj.root}/src/res"/>
-      <src path="${gen.dir}"/>
-      <src path="${flow.java}/test"/>
-      <src path="${Fuji}"/>
-      <exclude name="${jj.root}/src/backend/JavaCompiler.java"/>
-      <exclude name="${flow.java}/org/**"/>
-    </javac>
-    <antcall target="copy-resources"/>
-  </target>
+	<target name="build-mod" depends="backend-gen-java7" description="compile JastAddJ">
+		<mkdir dir="${bin.dir}" />
+		<!-- <copy todir="${src.dir}" preservelastmodified="true"> -->
+		<!--   <fileset dir="${jj.root}/src"> -->
+		<!-- 	<exclude name="backend/JavaCompiler.java"/> -->
+		<!-- 	<include name="**/*"/> -->
+		<!--   </fileset> -->
+		<!-- </copy> -->
+		<javac destdir="${bin.dir}" debug="${debug}" nowarn="true" includeantruntime="true" target="1.7" source="1.7">
+			<classpath>
+				<pathelement path="${lib}/commons-cli-1.2/commons-cli-1.2.jar" />
+				<pathelement path="${lib}/eclipse-equinox/org.eclipse.equinox.common_3.6.0.v20110523.jar" />
+				<pathelement path="${lib}/featureide/de.ovgu.featureide.lib.fm.jar" />
+				<pathelement path="${lib}/guidsl/guidsl.jar" />
+				<pathelement path="${lib}/jakarta/jakarta.jar" />
+				<pathelement path="${lib}/sat4j/org.sat4j.core.jar" />
+				<!-- <pathelement path="${tools.dir}/beaver-rt.jar"/> -->
+				<pathelement path="${flow.lib}/junit-4.11-SNAPSHOT.jar" />
+			</classpath>
+			<src path="${jj.root}/src/frontend" />
+			<src path="${jj.root}/src/backend" />
+			<src path="${jj.root}/src/res" />
+			<src path="${gen.dir}" />
+			<src path="${flow.java}/test" />
+			<src path="${Fuji}" />
+			<exclude name="${jj.root}/src/backend/JavaCompiler.java" />
+			<exclude name="${flow.java}/org/**" />
+		</javac>
+		<antcall target="copy-resources" />
+	</target>
 
-  <target name="backend-gen-java7" depends="scanner,parser">
-    <!-- generate AST node types and weave aspect modules -->
-    <mkdir dir="${gen.dir}"/>
-    <jastadd
-	package="${ast.package}"
-	rewrite="true"
-	beaver="true"
-	noVisitCheck="true"
-	noCacheCycle="true"
-	outdir="${gen.dir}"
-	defaultMap="new org.jastadd.util.RobustMap(new java.util.HashMap())">
-      <fileset dir="${java4.dir}/grammar">
-	<include name="*.ast"/>
-	<exclude name="CatchClause.ast"/>
-	<exclude name="Literals.ast"/>
-      </fileset>
-      <fileset dir="${java7.dir}/frontend">
-	<include name="Constant.jadd"/>
-	<include name="Variable.jadd"/>
-      </fileset>
-      <fileset dir="${java4.dir}/frontend">
-	<include name="*.jrag"/>
-	<include name="*.jadd"/>
-	<exclude name="BytecodeAttributes.jrag"/>
-	<exclude name="BytecodeDescriptor.jrag"/>
-	<exclude name="BytecodeReader.jrag"/>
-	<exclude name="Constant.jadd"/>
-	<exclude name="Literals.jrag"/>
-	<exclude name="Variable.jadd"/>
-      </fileset>
-      <fileset dir="${java4.dir}/backend">
-	<include name="*.jrag"/>
-	<include name="*.jadd"/>
-      </fileset>
-      <fileset dir="${java5.dir}/grammar">
-	<include name="*.ast"/>
-      </fileset>
-      <fileset dir="${java5.dir}/frontend">
-	<include name="*.jrag"/>
-	<include name="*.jadd"/>
-      </fileset>
-      <fileset dir="${java5.dir}/backend">
-	<include name="*.jrag"/>
-	<include name="*.jadd"/>
-      </fileset>
-      <fileset dir="${java6.dir}/frontend">
-	<include name="*.jrag"/>
-	<include name="*.jadd"/>
-      </fileset>
-      <fileset dir="${java7.dir}/grammar">
-	<include name="*.ast"/>
-      </fileset>
-      <fileset dir="${java7.dir}/frontend">
-	<include name="*.jrag"/>
-	<include name="*.jadd"/>
-	<exclude name="Constant.jadd"/>
-	<exclude name="Variable.jadd"/>
-      </fileset>
-      <fileset dir="${java7.dir}/backend">
-	<include name="*.jrag"/>
-	<include name="*.jadd"/>
-      </fileset>
-      <fileset dir="${Fuji}">
-	<include name="**/*.ast"/>
-	<include name="**/*.jrag"/>
-	<include name="**/*.jadd"/>
-      </fileset>
-      <fileset dir="${flow.jastadd}">
-	<include name="**/*.ast"/>
-	<include name="**/*.jrag"/>
-	<include name="**/*.jadd"/>
-	<exclude name="JavaDeadAssigns.jrag" />
-      </fileset>
-    </jastadd>
-  </target>
+	<target name="backend-gen-java7" depends="scanner,parser">
+		<!-- generate AST node types and weave aspect modules -->
+		<mkdir dir="${gen.dir}" />
+		<jastadd package="${ast.package}" rewrite="true" beaver="true" noVisitCheck="true" noCacheCycle="true" outdir="${gen.dir}" defaultMap="new org.jastadd.util.RobustMap(new java.util.HashMap())">
+			<fileset dir="${java4.dir}/grammar">
+				<include name="*.ast" />
+				<exclude name="CatchClause.ast" />
+				<exclude name="Literals.ast" />
+			</fileset>
+			<fileset dir="${java7.dir}/frontend">
+				<include name="Constant.jadd" />
+				<include name="Variable.jadd" />
+			</fileset>
+			<fileset dir="${java4.dir}/frontend">
+				<include name="*.jrag" />
+				<include name="*.jadd" />
+				<exclude name="BytecodeAttributes.jrag" />
+				<exclude name="BytecodeDescriptor.jrag" />
+				<exclude name="BytecodeReader.jrag" />
+				<exclude name="Constant.jadd" />
+				<exclude name="Literals.jrag" />
+				<exclude name="Variable.jadd" />
+			</fileset>
+			<fileset dir="${java4.dir}/backend">
+				<include name="*.jrag" />
+				<include name="*.jadd" />
+			</fileset>
+			<fileset dir="${java5.dir}/grammar">
+				<include name="*.ast" />
+			</fileset>
+			<fileset dir="${java5.dir}/frontend">
+				<include name="*.jrag" />
+				<include name="*.jadd" />
+			</fileset>
+			<fileset dir="${java5.dir}/backend">
+				<include name="*.jrag" />
+				<include name="*.jadd" />
+			</fileset>
+			<fileset dir="${java6.dir}/frontend">
+				<include name="*.jrag" />
+				<include name="*.jadd" />
+			</fileset>
+			<fileset dir="${java7.dir}/grammar">
+				<include name="*.ast" />
+			</fileset>
+			<fileset dir="${java7.dir}/frontend">
+				<include name="*.jrag" />
+				<include name="*.jadd" />
+				<exclude name="Constant.jadd" />
+				<exclude name="Variable.jadd" />
+			</fileset>
+			<fileset dir="${java7.dir}/backend">
+				<include name="*.jrag" />
+				<include name="*.jadd" />
+			</fileset>
+			<fileset dir="${Fuji}">
+				<include name="**/*.ast" />
+				<include name="**/*.jrag" />
+				<include name="**/*.jadd" />
+			</fileset>
+			<fileset dir="${flow.jastadd}">
+				<include name="**/*.ast" />
+				<include name="**/*.jrag" />
+				<include name="**/*.jadd" />
+				<exclude name="JavaDeadAssigns.jrag" />
+			</fileset>
+		</jastadd>
+	</target>
 
-  <target name="copy-resources">
-    <echo message="javaVersion=Java SE 7"
-	  file="${res.dir}/JavaSupportLevel.properties" />
-    <copy todir="${bin.dir}" preservelastmodified="true">
-      <fileset dir="${res.dir}">
-	<include name="**/*"/>
-      </fileset>
-    </copy>
-  </target>
+	<target name="copy-resources">
+		<echo message="javaVersion=Java SE 7" file="${res.dir}/JavaSupportLevel.properties" />
+		<copy todir="${bin.dir}" preservelastmodified="true">
+			<fileset dir="${res.dir}">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
 
-  <target name="scanner">
-    <!-- compose scanner specification -->
-    <mkdir dir="${tmp.dir}/scanner"/>
-    <concat destfile="${tmp.dir}/scanner/JavaScanner.flex"
-	    binary="true" force="false">
-      <!-- we use filelist because the order is important -->
-      <filelist dir="${java4.dir}/scanner">
-	<file name="Preamble.flex"/>
-      </filelist>
-      <filelist dir="${java7.dir}/scanner">
-	<file name="Macros.flex"/>
-      </filelist>
-      <filelist dir="${java4.dir}/scanner">
-	<file name="RulesPreamble.flex"/>
-	<file name="WhiteSpace.flex"/>
-	<file name="Comments.flex"/>
-	<file name="Keywords.flex"/>
-      </filelist>
-      <fileset dir="${Fuji}/scanner/">
-        <include name="FOPModifiers.flex" />
-        <include name="AHEAD.flex" />
-      </fileset>
-      <filelist dir="${java5.dir}/scanner">
-	<file name="Keywords.flex"/>
-      </filelist>
-      <filelist dir="${java7.dir}/scanner">
-	<file name="Literals.flex"/>
-      </filelist>
-      <filelist dir="${java4.dir}/scanner">
-	<file name="Separators.flex"/>
-	<file name="Operators.flex"/>
-      </filelist>
-      <filelist dir="${java5.dir}/scanner">
-	<file name="Operators.flex"/>
-	<file name="Identifiers.flex"/>
-      </filelist>
-      <filelist dir="${java4.dir}/scanner">
-	<file name="Postamble.flex"/>
-      </filelist>
-    </concat>
-    <!-- invoke scanner generator -->
-    <mkdir dir="${gen.dir}/scanner"/>
-    <jflex file="${tmp.dir}/scanner/JavaScanner.flex"
-	   outdir="${gen.dir}/scanner" nobak="yes"/>
-  </target>
+	<target name="scanner">
+		<!-- compose scanner specification -->
+		<mkdir dir="${tmp.dir}/scanner" />
+		<concat destfile="${tmp.dir}/scanner/JavaScanner.flex" binary="true" force="false">
+			<!-- we use filelist because the order is important -->
+			<filelist dir="${java4.dir}/scanner">
+				<file name="Preamble.flex" />
+			</filelist>
+			<filelist dir="${java7.dir}/scanner">
+				<file name="Macros.flex" />
+			</filelist>
+			<filelist dir="${java4.dir}/scanner">
+				<file name="RulesPreamble.flex" />
+				<file name="WhiteSpace.flex" />
+				<file name="Comments.flex" />
+				<file name="Keywords.flex" />
+			</filelist>
+			<fileset dir="${Fuji}/scanner/">
+				<include name="FOPModifiers.flex" />
+				<include name="AHEAD.flex" />
+			</fileset>
+			<filelist dir="${java5.dir}/scanner">
+				<file name="Keywords.flex" />
+			</filelist>
+			<filelist dir="${java7.dir}/scanner">
+				<file name="Literals.flex" />
+			</filelist>
+			<filelist dir="${java4.dir}/scanner">
+				<file name="Separators.flex" />
+				<file name="Operators.flex" />
+			</filelist>
+			<filelist dir="${java5.dir}/scanner">
+				<file name="Operators.flex" />
+				<file name="Identifiers.flex" />
+			</filelist>
+			<filelist dir="${java4.dir}/scanner">
+				<file name="Postamble.flex" />
+			</filelist>
+		</concat>
+		<!-- invoke scanner generator -->
+		<mkdir dir="${gen.dir}/scanner" />
+		<jflex file="${tmp.dir}/scanner/JavaScanner.flex" outdir="${gen.dir}/scanner" nobak="yes" />
+	</target>
 
-  <target name="parser">
-    <!-- compose parser specification -->
-    <mkdir dir="${tmp.dir}/parser"/>
-    <concat destfile="${tmp.dir}/parser/JavaParser.all"
-	    binary="true" force="false">
-      <!-- we use filelist because the order is important -->
-      <filelist dir="${java4.dir}/parser">
-	<file name="Preamble.parser"/>
-	<file name="Java1.4.parser"/>
-	<file name="ErrorRecovery.parser"/>
-      </filelist>
-      <fileset dir="${java5.dir}/parser">
-	<include name="*.parser"/>
-      </fileset>
-      <fileset dir="${java7.dir}/parser">
-	<include name="*.parser"/>
-      </fileset>
-      <fileset dir="${Fuji}/parser/">
-	<include name="FOPModifiers.parser"/>
-	<include name="AHEAD.parser"/>
-      </fileset>
-    </concat>
-    <java classname="Main" fork="true">
-      <classpath>
-	<pathelement path="${tools.dir}/JastAddParser.jar"/>
-	<pathelement path="${tools.dir}/beaver-rt.jar"/>
-      </classpath>
-      <arg value="${tmp.dir}/parser/JavaParser.all"/>
-      <arg value="${tmp.dir}/parser/JavaParser.beaver"/>
-    </java>
-    <!-- invoke parser generator -->
-    <mkdir dir="${gen.dir}/parser"/>
-    <beaver file="${tmp.dir}/parser/JavaParser.beaver"
-	    destdir="${gen.dir}/parser"
-	    terminalNames="yes"
-	    compress="no"
-	    useSwitch="yes"/>
-  </target>
+	<target name="parser">
+		<!-- compose parser specification -->
+		<mkdir dir="${tmp.dir}/parser" />
+		<concat destfile="${tmp.dir}/parser/JavaParser.all" binary="true" force="false">
+			<!-- we use filelist because the order is important -->
+			<filelist dir="${java4.dir}/parser">
+				<file name="Preamble.parser" />
+				<file name="Java1.4.parser" />
+				<file name="ErrorRecovery.parser" />
+			</filelist>
+			<fileset dir="${java5.dir}/parser">
+				<include name="*.parser" />
+			</fileset>
+			<fileset dir="${java7.dir}/parser">
+				<include name="*.parser" />
+			</fileset>
+			<fileset dir="${Fuji}/parser/">
+				<include name="FOPModifiers.parser" />
+				<include name="AHEAD.parser" />
+			</fileset>
+		</concat>
+		<java classname="Main" fork="true">
+			<classpath>
+				<pathelement path="${tools.dir}/JastAddParser.jar" />
+				<pathelement path="${tools.dir}/beaver-rt.jar" />
+			</classpath>
+			<arg value="${tmp.dir}/parser/JavaParser.all" />
+			<arg value="${tmp.dir}/parser/JavaParser.beaver" />
+		</java>
+		<!-- invoke parser generator -->
+		<mkdir dir="${gen.dir}/parser" />
+		<beaver file="${tmp.dir}/parser/JavaParser.beaver" destdir="${gen.dir}/parser" terminalNames="yes" compress="no" useSwitch="yes" />
+	</target>
 
-  <target name="clean"
-	  description="clean up all generated files">
-    <echo message="cleaning all generated files"/>
-    <delete dir="${bin.dir}"/>
-    <delete dir="${src.dir}"/>
-  </target>
+	<target name="clean" description="clean up all generated files">
+		<echo message="cleaning all generated files" />
+		<delete dir="${bin.dir}" />
+		<delete dir="${src.dir}" />
+	</target>
 
-  <!-- build binaries -->
-  <target name="jar" depends="build" description="build a runnable jar file (fuji without FOP access modifiers).  Run 'ant clean' if you have build fuji with access modifiers before.">
-    <property name="jarName" value="fuji.jar"/>
-    <antcall target="jar-builder"/>
-  </target>
+	<!-- build binaries -->
+	<target name="jar" depends="build" description="build a runnable jar file (fuji without FOP access modifiers).  Run 'ant clean' if you have build fuji with access modifiers before.">
+		<property name="jarName" value="fuji.jar" />
+		<antcall target="jar-builder" />
+	</target>
 
-  <target name="jar-mod" depends="build-mod" description="build a runnable jar file (fuji with FOP access modifiers). Run 'ant clean' if you have build fuji without access modifiers before.">
-    <property name="jarName" value="fuji-mod.jar"/>
-    <antcall target="jar-builder"/>
-  </target>
+	<target name="jar-mod" depends="build-mod" description="build a runnable jar file (fuji with FOP access modifiers). Run 'ant clean' if you have build fuji without access modifiers before.">
+		<property name="jarName" value="fuji-mod.jar" />
+		<antcall target="jar-builder" />
+	</target>
 
-  <target name="jar-builder">
-    <delete file="${bin.dir}/${jarName}"/>
-    <jar destfile="${bin.dir}/${jarName}" basedir="${bin.dir}" manifest="${Fuji}/Manifest">
-      <fileset dir="${bin.dir}">
-	<include name="**/*"/>
-      </fileset>
-      <fileset dir="${Fuji}">
-	<include name="**/*.java"/>
-	<include name="**/*.jrag"/>
-	<include name="**/*.jadd"/>
-      </fileset>
-      <zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/commons-cli-1.2/commons-cli-1.2.jar"/>
-      <zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/eclipse-equinox/org.eclipse.equinox.common_3.6.0.v20110523.jar"/>
-      <zipfileset includes="**/*" excludes="**/META-INF/**" src="${lib}/featureide/de.ovgu.featureide.fm.core_2.6.5.201305151404.jar"/>
-      <zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/guidsl/guidsl.jar"/>
-      <zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/jakarta/jakarta.jar"/>
-      <zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/sat4j/org.sat4j.core.jar"/>
-    </jar>
-  </target>
+	<target name="jar-builder">
+		<delete file="${bin.dir}/${jarName}" />
+		<jar destfile="${bin.dir}/${jarName}" basedir="${bin.dir}" manifest="${Fuji}/Manifest">
+			<fileset dir="${bin.dir}">
+				<include name="**/*" />
+			</fileset>
+			<fileset dir="${Fuji}">
+				<include name="**/*.java" />
+				<include name="**/*.jrag" />
+				<include name="**/*.jadd" />
+			</fileset>
+			<fileset dir="${gen.dir}">
+				<include name="**/*.java" />
+			</fileset>
+			<zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/commons-cli-1.2/commons-cli-1.2.jar" />
+			<!-- 			
+			<zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/eclipse-equinox/org.eclipse.equinox.common_3.6.0.v20110523.jar" />
+			<zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/guidsl/guidsl.jar" />
+			<zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/jakarta/jakarta.jar" />
+			<zipfileset includes="**/*" excludes="**/META-INF/**" src="${lib}/featureide/de.ovgu.featureide.lib.fm.jar" />
+			<zipfileset includes="**/*" excludes="META-INF/**" src="${lib}/sat4j/org.sat4j.core.jar" /> 
+			-->
+		</jar>
+	</target>
 
 </project>

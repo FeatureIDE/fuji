@@ -1,18 +1,20 @@
 package fuji;
 
-import java.io.File;
 import java.io.IOException;
 //import java.util.ArrayList;
 //import java.util.List;
+import java.nio.file.Paths;
 
 import org.apache.commons.cli.ParseException;
 
-import de.ovgu.featureide.fm.core.FeatureModel;
-import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
-import de.ovgu.featureide.fm.core.io.guidsl.GuidslReader;
-
 import AST.Problem;
 import AST.Program;
+import de.ovgu.featureide.fm.core.ExtensionManager.NoSuchExtensionException;
+import de.ovgu.featureide.fm.core.base.IFeatureModel;
+import de.ovgu.featureide.fm.core.base.impl.FMFactoryManager;
+import de.ovgu.featureide.fm.core.io.UnsupportedModelException;
+import de.ovgu.featureide.fm.core.io.guidsl.GuidslFormat;
+import de.ovgu.featureide.fm.core.io.manager.FileHandler;
 
 public class MainProgmodTest {
     public static void main(String[] args) {
@@ -54,11 +56,17 @@ public class MainProgmodTest {
          */
         try {
             // File guidsl_file = new File("examples/GPL/GPL.model");
-            File guidsl_file = new File(
-                    "tests_typechecker/FieldAccess/01/model.m");
-            FeatureModel featureModel = new FeatureModel();
-            GuidslReader reader = new GuidslReader(featureModel);
-            reader.readFromFile(guidsl_file);
+            final String pathName = "tests_typechecker/FieldAccess/01/model.m";
+            
+        	final GuidslFormat format = new GuidslFormat();
+        	IFeatureModel featureModel = null;
+            try {
+            	featureModel = FMFactoryManager.getFactory(pathName, format).createFeatureModel();
+				FileHandler.load(Paths.get(pathName), featureModel, format);
+			} catch (NoSuchExtensionException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
 
             /*
              * Initialisiere eine Instanz von Main mit den Optionen und der
